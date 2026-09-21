@@ -1,3 +1,5 @@
+-include .env
+
 build:; forge build
 anvil_deploy:;
 sepolia_deploy:;
