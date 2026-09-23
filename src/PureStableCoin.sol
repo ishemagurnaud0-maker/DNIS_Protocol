@@ -1,9 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-
-import { ERC20Burnable, ERC20 } from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import {ERC20Burnable, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /*
 * @title Pure StableCoin Contract
@@ -19,44 +18,37 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
  */
 
 contract PureStableCoin is ERC20Burnable, Ownable {
-
     error PureStableCoin__FundsMustBeGreaterFunds();
     error PureStableCoin__InsufficientFunds();
     error PureStableCoin__NotZeroAddress();
 
-
     constructor() ERC20("PURE", "PR") Ownable(msg.sender) {}
 
-    function burn(uint256 _amount) public override onlyOwner{
-        
-    uint256 balance = balanceOf(msg.sender);
+    function burn(uint256 _amount) public override onlyOwner {
+        uint256 balance = balanceOf(msg.sender);
 
-    if(_amount <= 0) {
-        revert PureStableCoin__FundsMustBeGreaterFunds();
+        if (_amount <= 0) {
+            revert PureStableCoin__FundsMustBeGreaterFunds();
+        }
+
+        if (balance < _amount) {
+            revert PureStableCoin__InsufficientFunds();
+        }
+
+        super.burn(_amount);
     }
 
-    if(balance < _amount) {
-        revert PureStableCoin__InsufficientFunds();
-    }
-
-    super.burn(_amount);
-}
-
-
-    function mint(address _to, uint256 _amount) external onlyOwner returns(bool) {
-        if(_to == address(0)) {
+    function mint(address _to, uint256 _amount) external onlyOwner returns (bool) {
+        if (_to == address(0)) {
             revert PureStableCoin__NotZeroAddress();
         }
 
-            if(_amount <= 0) {
-                revert PureStableCoin__FundsMustBeGreaterFunds();
-            }
+        if (_amount <= 0) {
+            revert PureStableCoin__FundsMustBeGreaterFunds();
+        }
 
-            _mint(_to, _amount);
+        _mint(_to, _amount);
 
-           return true; 
+        return true;
     }
-
-
-
-}   
+}
