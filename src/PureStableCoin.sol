@@ -28,6 +28,7 @@ contract PureStableCoin is ERC20Burnable, Ownable {
     constructor() ERC20("PURE", "PR") Ownable(msg.sender) {}
 
     function burn(uint256 _amount) public override onlyOwner{
+        
     uint256 balance = balanceOf(msg.sender);
 
     if(_amount <= 0) {
