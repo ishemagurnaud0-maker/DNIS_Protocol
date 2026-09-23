@@ -1,66 +1,15 @@
-## Foundry
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+ ''' THE PURE STABLE COIN '''
 
-Foundry consists of:
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
 
-## Documentation
+ The PURE coin v1.0 will focus on being mainly decentralized in the way it creates and burns its tokens according to the DSCEngine that will ensure that the borrowers will put up higher collateral compared to the borrowed coins in order to avoid the volatility of the collateral causing the debt to become bad debt for the protocol.
 
-https://book.getfoundry.sh/
+This is a lending Decentralized Finance(De-Fi) lending protocol stablecoin
 
-## Usage
+The stable coin will be pegged to a USD dollar bill.
+We will use the algorithmic stability method for burning and minting the coin in order to make it more decentralized.
 
-### Build
+The coin will use exogenous collateral by where people will put up either wETH or wBTC as collateral in order to borrow the stablecoin.
 
-```shell
-$ forge build
-```
 
-### Test
-
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
