@@ -85,13 +85,14 @@ contract PREngine is ReentrancyGuard {
         nonReentrant
     {
         s_collateralDeposited[msg.sender][tokenCollateralAddress] += amountCollateral;
-        emit CollateralDeposited(msg.sender, tokenCollateralAddress, amountCollateral);
-
-       bool success = IERC20(tokenCollateralAddress).transferFrom(msg.sender, address(this), amountCollateral);
+        bool success = IERC20(tokenCollateralAddress).transferFrom(msg.sender, address(this), amountCollateral);
 
        if(!success) {
          revert PREngine__TransferFailed();
        }
+
+       emit CollateralDeposited(msg.sender, tokenCollateralAddress, amountCollateral);
+
     }
 
     
@@ -104,7 +105,7 @@ contract PREngine is ReentrancyGuard {
 
     function burnPRCoin() external {}
 
-    function mintPRCoin() external {}
+    function mintPRCoin(uint256 amountToMint) external NotZero(amountToMint) nonReentrant{}
 
     function getHealthFactor() external view {}
 }
