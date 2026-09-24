@@ -30,16 +30,19 @@ contract PREngine is ReentrancyGuard {
     error PREngine__TokenAddressesExceedPriceFeeds();
     error PREngine__InvalidTokenAddress();
     error PREngine__TransferFailed();
+    error PREngine__InsufficientCollateral();
+    error PREngine__HealthFactorHasBroken();
 
 
     event CollateralDeposited(address indexed owner, address indexed tokenAddress, uint256 amount);
 
     mapping(address account => mapping(address token => uint256 amount)) public s_collateralDeposited;
     mapping(address token => address priceFeed) private s_tokenToPriceFeed;
+    mapping(address account => uint256 amountMinted) private s_amountMinted;
 
 
     PureStableCoin private immutable i_PRCoin;
-
+    uint256 private immutable i_LiquidationThreshold;
 
 
     modifier NotZero(uint256 _amount) {
@@ -58,7 +61,7 @@ contract PREngine is ReentrancyGuard {
         _;
     }
 
-    constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address PRCoinAddress) {
+    constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address PRCoinAddress, uint256 LtThreshold) {
         if (tokenAddresses.length != priceFeedAddresses.length) {
             revert PREngine__TokenAddressesExceedPriceFeeds();
         }
@@ -68,6 +71,7 @@ contract PREngine is ReentrancyGuard {
         }
 
         i_PRCoin = PureStableCoin(PRCoinAddress);
+        i_LiquidationThreshold = LtThreshold;
     }
 
     function depositCollateralAndMintPRCoin() external {}
@@ -105,7 +109,38 @@ contract PREngine is ReentrancyGuard {
 
     function burnPRCoin() external {}
 
-    function mintPRCoin(uint256 amountToMint) external NotZero(amountToMint) nonReentrant{}
+    /*
+    * @notice follows CEI
+    * @param amountToMint The amount of PURE stablecoin to mint 
+    * @notice They must have more collateral value than the minimum threshold
+     */
+
+    function mintPRCoin(uint256 amountToMint) external NotZero(amountToMint) nonReentrant{
+
+    }
 
     function getHealthFactor() external view {}
+
+
+
+
+    function _healthFactor(address user, address tokenCollateralAddress) internal view returns(uint256) {
+        uint256 totalCollateralDeposited = s_collateralDeposited[user][tokenCollateralAddress];
+
+            if(totalCollateralDeposited == 0) {
+                revert PREngine__InsufficientCollateral();
+            }
+
+           uint256 healthFactor = (totalCollateralDeposited * i_LiquidationThreshold)/s_amountMinted[user];
+
+           return healthFactor;
+    }
+
+    function _revertIfHealthFactorIsBroken(address tokenCollateralAddress) internal view {
+        uint256 healthFactor = _healthFactor(msg.sender, tokenCollateralAddress);
+
+            if(healthFactor < 1) {
+                revert PREngine__HealthFactorHasBroken();
+            }
+    }
 }
