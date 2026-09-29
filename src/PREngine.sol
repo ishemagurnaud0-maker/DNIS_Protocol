@@ -22,7 +22,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * @notice This contract is the core of the PURE StableCoin System.
  */
 
-contract PREngine is ReentrancyGuard {
+contract PREngine is ReentrancyGuard, PureStableCoin{
 
 
     error PREngine__MustBeGreaterThanZero();
@@ -32,9 +32,11 @@ contract PREngine is ReentrancyGuard {
     error PREngine__TransferFailed();
     error PREngine__InsufficientCollateral();
     error PREngine__HealthFactorHasBroken();
+    error PREngine__FailedToMintPRStableCoin();
 
 
     event CollateralDeposited(address indexed owner, address indexed tokenAddress, uint256 amount);
+    event PUREStableCoinMinted(address indexed account, uint256 indexed amount);
 
     mapping(address account => mapping(address token => uint256 amount)) public s_collateralDeposited;
     mapping(address token => address priceFeed) private s_tokenToPriceFeed;
@@ -116,7 +118,11 @@ contract PREngine is ReentrancyGuard {
      */
 
     function mintPRCoin(uint256 amountToMint) external NotZero(amountToMint) nonReentrant{
-        
+        _revertIfHealthFactorIsBroken(msg.sender);
+         s_amountMinted[msg.sender] += amountToMint;
+         i_PRCoin.mint(msg.sender, amountToMint);
+
+            emit PUREStableCoinMinted(msg.sender, amountToMint);
     }
 
     function getHealthFactor() external view {}
@@ -137,10 +143,6 @@ contract PREngine is ReentrancyGuard {
     }
 
     function _revertIfHealthFactorIsBroken(address tokenCollateralAddress) internal view {
-        uint256 healthFactor = _healthFactor(msg.sender, tokenCollateralAddress);
-
-            if(healthFactor < 1) {
-                revert PREngine__HealthFactorHasBroken();
-            }
+       
     }
 }
