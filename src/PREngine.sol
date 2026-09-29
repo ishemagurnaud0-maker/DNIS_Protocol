@@ -4,6 +4,8 @@ pragma solidity ^0.8.30;
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {PureStableCoin} from "./PureStableCoin.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
+
 
 /*
 * @title PUREStableCoin Engine
@@ -45,7 +47,7 @@ contract PREngine is ReentrancyGuard {
 
     PureStableCoin private immutable i_PRCoin;
     uint256 private immutable i_LiquidationThreshold;
-
+    address[] private s_collateralTokens;
 
     modifier NotZero(uint256 _amount) {
         if (_amount <= 0) {
@@ -70,6 +72,7 @@ contract PREngine is ReentrancyGuard {
 
         for (uint256 i = 0; i < tokenAddresses.length; i++) {
             s_tokenToPriceFeed[tokenAddresses[i]] = priceFeedAddresses[i];
+            s_collateralTokens.push(tokenAddresses[i]);
         }
 
         i_PRCoin = PureStableCoin(PRCoinAddress);
@@ -138,9 +141,27 @@ contract PREngine is ReentrancyGuard {
        (uint256 totalPRcoinMinted, uint256 totalCollateralDepositedInUSD) = _getAccountInfo(user);
     }
 
-    function _getAccountInfo(address user) private returns(uint256 totalPRcoinMinted, uint256 totalCollateralDepositedInUSD) {
+    function _getAccountInfo(address user) private view returns(uint256 totalPRcoinMinted, uint256 totalCollateralDepositedInUSD) {
         totalPRcoinMinted = s_PRCoinMinted[user];
+        totalCollateralDepositedInUSD = _getAccountCollateralValue(user);
+    }
 
+
+    function _getAccountCollateralValue(address user) public view returns(uint256) {
+         for(uint256 i = 0; i < s_collateralTokens.length; i++) {
+            address token = s_collateralTokens[i];
+            uint256 amount = s_collateralDeposited[user][token];
+            uint256 totalValue += getUSDValue(token, amount);
+         }
+    }
+
+    function getUSDValue(address token, uint256 amount) public returns(uint256){
+        address _priceFeed = s_tokenToPriceFeed[token];
+        AggregatorV3Interface priceFeed = AggregatorV3Interface(_priceFeed);
+
+        (,int price,,,) = priceFeed.latestRoundData();
+
+        return price * amount;
     }
 
 
