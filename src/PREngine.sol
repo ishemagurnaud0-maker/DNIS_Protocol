@@ -44,7 +44,7 @@ contract PREngine is ReentrancyGuard {
     mapping(address token => address priceFeed) private s_tokenToPriceFeed;
     mapping(address account => uint256 amountMinted) private s_PRCoinMinted;
 
-
+    uint256 private constant ADDITIONAL_PRECISION = 1e18;
     PureStableCoin private immutable i_PRCoin;
     uint256 private immutable i_LiquidationThreshold;
     address[] private s_collateralTokens;
@@ -161,7 +161,7 @@ contract PREngine is ReentrancyGuard {
 
         (,int price,,,) = priceFeed.latestRoundData();
 
-        return price * amount;
+        return (uint256(price) * ADDITIONAL_PRECISION * amount) / 1e18;
     }
 
 
