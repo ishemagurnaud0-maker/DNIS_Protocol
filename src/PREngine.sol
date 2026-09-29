@@ -44,6 +44,7 @@ contract PREngine is ReentrancyGuard {
     mapping(address token => address priceFeed) private s_tokenToPriceFeed;
     mapping(address account => uint256 amountMinted) private s_PRCoinMinted;
 
+    uint256 private constant PRECISION = 1e18;
     uint256 private constant ADDITIONAL_PRECISION = 1e18;
     PureStableCoin private immutable i_PRCoin;
     uint256 private immutable i_LiquidationThreshold;
@@ -139,11 +140,15 @@ contract PREngine is ReentrancyGuard {
 
     function _healthFactor(address user) internal returns(uint256) {
        (uint256 totalPRcoinMinted, uint256 totalCollateralDepositedInUSD) = _getAccountInfo(user);
+
+       
     }
 
     function _getAccountInfo(address user) private view returns(uint256 totalPRcoinMinted, uint256 totalCollateralDepositedInUSD) {
         totalPRcoinMinted = s_PRCoinMinted[user];
         totalCollateralDepositedInUSD = _getAccountCollateralValue(user);
+
+        return (totalPRcoinMinted, totalCollateralDepositedInUSD);
     }
 
 
@@ -153,15 +158,17 @@ contract PREngine is ReentrancyGuard {
             uint256 amount = s_collateralDeposited[user][token];
             uint256 totalValue += getUSDValue(token, amount);
          }
+
+         return totalValue;
     }
 
-    function getUSDValue(address token, uint256 amount) public returns(uint256){
+    function getUSDValue(address token, uint256 amount) public view returns(uint256){
         address _priceFeed = s_tokenToPriceFeed[token];
         AggregatorV3Interface priceFeed = AggregatorV3Interface(_priceFeed);
 
         (,int price,,,) = priceFeed.latestRoundData();
 
-        return (uint256(price) * ADDITIONAL_PRECISION * amount) / 1e18;
+        return (uint256(price) * ADDITIONAL_PRECISION * amount) / PRECISION;
     }
 
 
