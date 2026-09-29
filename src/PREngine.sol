@@ -116,7 +116,7 @@ contract PREngine is ReentrancyGuard {
      */
 
     function mintPRCoin(uint256 amountToMint) external NotZero(amountToMint) nonReentrant{
-
+        
     }
 
     function getHealthFactor() external view {}
@@ -131,7 +131,7 @@ contract PREngine is ReentrancyGuard {
                 revert PREngine__InsufficientCollateral();
             }
 
-           uint256 healthFactor = (totalCollateralDeposited * i_LiquidationThreshold)/s_amountMinted[user];
+           uint256 healthFactor = (totalCollateralDeposited * i_LiquidationThreshold)/ s_amountMinted[user];
 
            return healthFactor;
     }
