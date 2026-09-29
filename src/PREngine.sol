@@ -33,8 +33,8 @@ contract PREngine is ReentrancyGuard {
     error PREngine__InvalidTokenAddress();
     error PREngine__TransferFailed();
     error PREngine__InsufficientCollateral();
-    error PREngine__HealthFactorHasBroken();
     error PREngine__FailedToMintPRStableCoin();
+    error PREngine__HealthFactorIsBroken(int256 healthFactor);
 
 
     event CollateralDeposited(address indexed owner, address indexed tokenAddress, uint256 amount);
@@ -44,6 +44,8 @@ contract PREngine is ReentrancyGuard {
     mapping(address token => address priceFeed) private s_tokenToPriceFeed;
     mapping(address account => uint256 amountMinted) private s_PRCoinMinted;
 
+    uint256 private constant MIN_HEALTH_FACTOR = 1;
+    uint256 private constant LIQUIDATION_THRESHOLD = 50;
     uint256 private constant PRECISION = 1e18;
     uint256 private constant ADDITIONAL_PRECISION = 1e18;
     PureStableCoin private immutable i_PRCoin;
@@ -135,12 +137,17 @@ contract PREngine is ReentrancyGuard {
 
 
     function _revertIfHealthFactorIsBroken(address user) internal view {
-       
+       uint256 userHealthFactor = _healthFactor(user);
+       if(userHealthFactor < MIN_HEALTH_FACTOR) {
+            revert PREngine__HealthFactorIsBroken(userHealthFactor);
+       }
     }
 
     function _healthFactor(address user) internal returns(uint256) {
        (uint256 totalPRcoinMinted, uint256 totalCollateralDepositedInUSD) = _getAccountInfo(user);
+       uint256 collateralAdjustedForThresHold = (totalCollateralDepositedInUSD * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
 
+       return (collateralAdjustedForThresHold * PRECISION) / totalPRcoinMinted;
        
     }
 
