@@ -40,7 +40,7 @@ contract PREngine is ReentrancyGuard {
 
     mapping(address account => mapping(address token => uint256 amount)) public s_collateralDeposited;
     mapping(address token => address priceFeed) private s_tokenToPriceFeed;
-    mapping(address account => uint256 amountMinted) private s_amountMinted;
+    mapping(address account => uint256 amountMinted) private s_PRCoinMinted;
 
 
     PureStableCoin private immutable i_PRCoin;
@@ -119,7 +119,7 @@ contract PREngine is ReentrancyGuard {
 
     function mintPRCoin(uint256 amountToMint) external NotZero(amountToMint) nonReentrant{
         _revertIfHealthFactorIsBroken(msg.sender);
-         s_amountMinted[msg.sender] += amountToMint;
+         s_PRCoinMinted[msg.sender] += amountToMint;
          i_PRCoin.mint(msg.sender, amountToMint);
 
             emit PUREStableCoinMinted(msg.sender, amountToMint);
@@ -130,19 +130,18 @@ contract PREngine is ReentrancyGuard {
 
 
 
-    function _healthFactor(address user, address tokenCollateralAddress) internal view returns(uint256) {
-        uint256 totalCollateralDeposited = s_collateralDeposited[user][tokenCollateralAddress];
-
-            if(totalCollateralDeposited == 0) {
-                revert PREngine__InsufficientCollateral();
-            }
-
-           uint256 healthFactor = (totalCollateralDeposited * i_LiquidationThreshold)/ s_amountMinted[user];
-
-           return healthFactor;
-    }
-
     function _revertIfHealthFactorIsBroken(address user) internal view {
        
     }
+
+    function _healthFactor(address user) internal returns(uint256) {
+       (uint256 totalPRcoinMinted, uint256 totalCollateralDepositedInUSD) = _getAccountInfo(user);
+    }
+
+    function _getAccountInfo(address user) private returns(uint256 totalPRcoinMinted, uint256 totalCollateralDepositedInUSD) {
+        totalPRcoinMinted = s_PRCoinMinted[user];
+
+    }
+
+
 }
