@@ -22,7 +22,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * @notice This contract is the core of the PURE StableCoin System.
  */
 
-contract PREngine is ReentrancyGuard, PureStableCoin{
+contract PREngine is ReentrancyGuard {
 
 
     error PREngine__MustBeGreaterThanZero();
@@ -142,7 +142,7 @@ contract PREngine is ReentrancyGuard, PureStableCoin{
            return healthFactor;
     }
 
-    function _revertIfHealthFactorIsBroken(address tokenCollateralAddress) internal view {
+    function _revertIfHealthFactorIsBroken(address user) internal view {
        
     }
 }
