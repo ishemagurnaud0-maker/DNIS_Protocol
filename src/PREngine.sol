@@ -128,9 +128,13 @@ contract PREngine is ReentrancyGuard {
     function mintPRCoin(uint256 amountToMint) external NotZero(amountToMint) nonReentrant{
         _revertIfHealthFactorIsBroken(msg.sender);
          s_PRCoinMinted[msg.sender] += amountToMint;
-         i_PRCoin.mint(msg.sender, amountToMint);
-
+         bool minted = i_PRCoin.mint(msg.sender, amountToMint);
+        if(minted){
             emit PUREStableCoinMinted(msg.sender, amountToMint);
+        }else {
+            revert PREngine__FailedToMintPRStableCoin();
+        }
+        
     }
 
     function getHealthFactor() external view {}
