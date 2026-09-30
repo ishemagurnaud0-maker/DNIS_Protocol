@@ -117,7 +117,14 @@ contract PREngine is ReentrancyGuard {
 
     function liquidate() external {}
 
-    function burnPRCoin() external {}
+    /*@notice This function is used to burn unnecessary stable coins in order to get back your collateral
+     *@param amountToBurn is the amount of tokens you want to burn or destroy
+     
+     */
+
+    function burnPRCoin(uint256 amountToBurn) external nonReentrant{
+        i_PRCoin.burn(amountToBurn);
+    }
 
     /*
     * @notice follows CEI
