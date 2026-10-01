@@ -45,7 +45,6 @@ contract PREngine is ReentrancyGuard {
     mapping(address account => uint256 amountMinted) private s_PRCoinMinted;
 
     uint256 private constant MIN_HEALTH_FACTOR = 1;
-    uint256 private constant LIQUIDATION_THRESHOLD = 50;
     uint256 private constant PRECISION = 1e18;
     uint256 private constant ADDITIONAL_PRECISION = 1e18;
     uint256 private constant LIQUIDATION_PRECISION = 100;
@@ -119,7 +118,7 @@ contract PREngine is ReentrancyGuard {
 
     /*@notice This function is used to burn unnecessary stable coins in order to get back your collateral
      *@param amountToBurn is the amount of tokens you want to burn or destroy
-     
+
      */
 
     function burnPRCoin(uint256 amountToBurn) external nonReentrant{
@@ -158,7 +157,7 @@ contract PREngine is ReentrancyGuard {
 
     function _healthFactor(address user) internal view returns(uint256) {
        (uint256 totalPRcoinMinted, uint256 totalCollateralDepositedInUSD) = _getAccountInfo(user);
-       uint256 collateralAdjustedForThresHold = (totalCollateralDepositedInUSD * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
+       uint256 collateralAdjustedForThresHold = (totalCollateralDepositedInUSD * i_LiquidationThreshold) / LIQUIDATION_PRECISION;
 
        return (collateralAdjustedForThresHold * PRECISION) / totalPRcoinMinted;
        
