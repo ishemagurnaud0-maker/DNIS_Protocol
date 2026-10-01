@@ -6,7 +6,6 @@ import {PureStableCoin} from "./PureStableCoin.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
-
 /*
 * @title PUREStableCoin Engine
 * @author ISHEMA Gurnaud
@@ -25,8 +24,6 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interf
  */
 
 contract PREngine is ReentrancyGuard {
-
-
     error PREngine__MustBeGreaterThanZero();
     error PREngine__InvalidAddress();
     error PREngine__TokenAddressesExceedPriceFeeds();
@@ -35,7 +32,7 @@ contract PREngine is ReentrancyGuard {
     error PREngine__InsufficientCollateral();
     error PREngine__FailedToMintPRStableCoin();
     error PREngine__HealthFactorIsBroken(uint256 healthFactor);
-
+    error PREngine__InvalidPriceFeedAnswer();
 
     event CollateralDeposited(address indexed owner, address indexed tokenAddress, uint256 amount);
     event PUREStableCoinMinted(address indexed account, uint256 indexed amount);
@@ -69,7 +66,12 @@ contract PREngine is ReentrancyGuard {
         _;
     }
 
-    constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address PRCoinAddress, uint256 LtThreshold) {
+    constructor(
+        address[] memory tokenAddresses,
+        address[] memory priceFeedAddresses,
+        address PRCoinAddress,
+        uint256 LtThreshold
+    ) {
         if (tokenAddresses.length != priceFeedAddresses.length) {
             revert PREngine__TokenAddressesExceedPriceFeeds();
         }
@@ -100,15 +102,12 @@ contract PREngine is ReentrancyGuard {
         s_collateralDeposited[msg.sender][tokenCollateralAddress] += amountCollateral;
         bool success = IERC20(tokenCollateralAddress).transferFrom(msg.sender, address(this), amountCollateral);
 
-       if(!success) {
-         revert PREngine__TransferFailed();
-       }
+        if (!success) {
+            revert PREngine__TransferFailed();
+        }
 
-       emit CollateralDeposited(msg.sender, tokenCollateralAddress, amountCollateral);
-
+        emit CollateralDeposited(msg.sender, tokenCollateralAddress, amountCollateral);
     }
-
-    
 
     function redeemCollateralForPRCoin() external {}
 
@@ -121,86 +120,92 @@ contract PREngine is ReentrancyGuard {
 
      */
 
-    function burnPRCoin(uint256 amountToBurn) external nonReentrant{
+    function burnPRCoin(uint256 amountToBurn) external nonReentrant {
         i_PRCoin.burn(amountToBurn);
     }
 
     /*
     * @notice follows CEI
-    * @param amountToMint The amount of PURE stablecoin to mint 
+    * @param amountToMint The amount of PURE stablecoin to mint
     * @notice They must have more collateral value than the minimum threshold
      */
 
-    function mintPRCoin(uint256 amountToMint) external NotZero(amountToMint) nonReentrant{
+    function mintPRCoin(uint256 amountToMint) external NotZero(amountToMint) nonReentrant {
         _revertIfHealthFactorIsBroken(msg.sender);
-         s_PRCoinMinted[msg.sender] += amountToMint;
-         bool minted = i_PRCoin.mint(msg.sender, amountToMint);
-        if(minted){
+        s_PRCoinMinted[msg.sender] += amountToMint;
+        bool minted = i_PRCoin.mint(msg.sender, amountToMint);
+        if (minted) {
             emit PUREStableCoinMinted(msg.sender, amountToMint);
-        }else {
+        } else {
             revert PREngine__FailedToMintPRStableCoin();
         }
-        
     }
 
     function getHealthFactor() external view {}
 
-
-
-
     function _revertIfHealthFactorIsBroken(address user) internal view {
-       uint256 userHealthFactor = _healthFactor(user);
-       if(userHealthFactor < MIN_HEALTH_FACTOR) {
+        uint256 userHealthFactor = _healthFactor(user);
+        if (userHealthFactor < MIN_HEALTH_FACTOR) {
             revert PREngine__HealthFactorIsBroken(userHealthFactor);
-       }
+        }
     }
 
-    function _healthFactor(address user) internal view returns(uint256) {
-       (uint256 totalPRcoinMinted, uint256 totalCollateralDepositedInUSD) = _getAccountInfo(user);
-       uint256 collateralAdjustedForThresHold = (totalCollateralDepositedInUSD * i_LiquidationThreshold) / LIQUIDATION_PRECISION;
+    function _healthFactor(address user) internal view returns (uint256) {
+        (uint256 totalPRcoinMinted, uint256 totalCollateralDepositedInUSD) = _getAccountInfo(user);
+        uint256 collateralAdjustedForThresHold =
+            (totalCollateralDepositedInUSD * i_LiquidationThreshold) / LIQUIDATION_PRECISION;
 
-       return (collateralAdjustedForThresHold * PRECISION) / totalPRcoinMinted;
-       
+        return (collateralAdjustedForThresHold * PRECISION) / totalPRcoinMinted;
     }
 
-    function _getAccountInfo(address user) private view returns(uint256 totalPRcoinMinted, uint256 totalCollateralDepositedInUSD) {
+    function _getAccountInfo(address user)
+        private
+        view
+        returns (uint256 totalPRcoinMinted, uint256 totalCollateralDepositedInUSD)
+    {
         totalPRcoinMinted = s_PRCoinMinted[user];
         totalCollateralDepositedInUSD = _getAccountCollateralValue(user);
 
         return (totalPRcoinMinted, totalCollateralDepositedInUSD);
     }
 
-
-    function _getAccountCollateralValue(address user) public view returns(uint256 totalValue) {
-         for(uint256 i = 0; i < s_collateralTokens.length; i++) {
+    function _getAccountCollateralValue(address user) public view returns (uint256 totalValue) {
+        for (uint256 i = 0; i < s_collateralTokens.length; i++) {
             address token = s_collateralTokens[i];
             uint256 amount = s_collateralDeposited[user][token];
             totalValue += getUSDValue(token, amount);
-         }
+        }
 
-         return totalValue;
+        return totalValue;
     }
 
-    function getUSDValue(address token, uint256 amount) public view returns(uint256){
+    function getUSDValue(address token, uint256 amount) public view returns (uint256) {
         address _priceFeed = s_tokenToPriceFeed[token];
         AggregatorV3Interface priceFeed = AggregatorV3Interface(_priceFeed);
 
-        (,int price,,,) = priceFeed.latestRoundData();
+        (, int256 price,,,) = priceFeed.latestRoundData();
 
+        // casting to 'uint80' is safe because of previous checks
+        // forge-lint: disable-next-line(unsafe-typecast)
+        if (price <= 0 || uint256(price) > type(uint256).max) {
+            revert PREngine__InvalidPriceFeedAnswer();
+        }
+        // casting to 'uint80' is safe because of previous checks
+       // forge-lint: disable-next-line(unsafe-typecast)
         return (uint256(price) * ADDITIONAL_PRECISION * amount) / PRECISION;
     }
 
     //test helper functions
 
-    function getWBTCAddress() external view returns(address) {
+    function getWBTCAddress() external view returns (address) {
         return s_collateralTokens[1];
     }
 
-    function getWETHAddress() external view returns(address) {
+    function getWETHAddress() external view returns (address) {
         return s_collateralTokens[0];
     }
 
-    function getCollateralDeposited(address user, address tokenAddress) external view returns(uint256) {
+    function getCollateralDeposited(address user, address tokenAddress) external view returns (uint256) {
         return s_collateralDeposited[user][tokenAddress];
     }
 }

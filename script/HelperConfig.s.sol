@@ -1,14 +1,12 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-import { Script } from "forge-std/Script.sol";
-import { MockWBTC } from "./../test/mocks/MockWBTC.sol";
-import { MockV3Aggregator } from "./../test/mocks/MockV3Aggregator.sol";
-import { ERC20Mock } from "test/mocks/ERC20Mock.sol";
-
+import {Script} from "forge-std/Script.sol";
+import {MockWBTC} from "./../test/mocks/MockWBTC.sol";
+import {MockV3Aggregator} from "./../test/mocks/MockV3Aggregator.sol";
+import {ERC20Mock} from "test/mocks/ERC20Mock.sol";
 
 contract HelperConfig is Script {
-
     struct NetworkConfig {
         address wethUsdPriceFeedAddress;
         address wbtcUsdPriceFeedAddress;
@@ -16,18 +14,17 @@ contract HelperConfig is Script {
         address wbtc;
     }
 
-    uint8 private constant DECIMALS = 8; 
+    uint8 private constant DECIMALS = 8;
     int256 private constant ETH_USD_PRICE = 2000e8;
     int256 private constant BTC_USD_PRICE = 10000e8;
 
     NetworkConfig public activeNetworkConfig;
-    
+
     constructor() {
         getActiveNetwork();
     }
 
-    function getSepoliaConfig() public returns(NetworkConfig memory){
-
+    function getSepoliaConfig() public returns (NetworkConfig memory) {
         vm.startBroadcast();
         MockWBTC wbtc = new MockWBTC();
         vm.stopBroadcast();
@@ -40,18 +37,18 @@ contract HelperConfig is Script {
         });
     }
 
-    function getActiveNetwork() public returns(NetworkConfig memory){
-        if(block.chainid == 11155111) {
+    function getActiveNetwork() public returns (NetworkConfig memory) {
+        if (block.chainid == 11155111) {
             activeNetworkConfig = getSepoliaConfig();
-        }else {
+        } else {
             activeNetworkConfig = getOrCreateAnvilEthConfig();
         }
 
         return activeNetworkConfig;
     }
 
-    function getOrCreateAnvilEthConfig() public returns(NetworkConfig memory){
-        if(activeNetworkConfig.wethUsdPriceFeedAddress != address(0)) {
+    function getOrCreateAnvilEthConfig() public returns (NetworkConfig memory) {
+        if (activeNetworkConfig.wethUsdPriceFeedAddress != address(0)) {
             return activeNetworkConfig;
         }
 

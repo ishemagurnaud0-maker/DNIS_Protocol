@@ -1,12 +1,11 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-import { Test, console } from "forge-std/Test.sol";
-import { DeployPureCoin } from "../../script/DeployPRC.s.sol";
-import { PREngine } from "../../src/PREngine.sol";
-import { PureStableCoin } from "../../src/PureStableCoin.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
+import {Test, console} from "forge-std/Test.sol";
+import {DeployPureCoin} from "../../script/DeployPRC.s.sol";
+import {PREngine} from "../../src/PREngine.sol";
+import {PureStableCoin} from "../../src/PureStableCoin.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract TestPREngine is Test {
     PREngine public prEngine;
@@ -20,7 +19,7 @@ contract TestPREngine is Test {
         (pureCoin, prEngine) = deployer.run();
     }
 
-    function testEngineDeployment() public {
+    function testEngineDeployment() public view {
         assert(address(prEngine) != address(0));
     }
 
@@ -32,7 +31,7 @@ contract TestPREngine is Test {
         vm.startPrank(bob);
         pureCoin.mint(bob, depositAmount);
         pureCoin.approve(address(prEngine), depositAmount);
-        
+
         // Deposit collateral
         prEngine.depositCollateral(wethAddress, depositAmount);
         vm.stopPrank();
@@ -40,8 +39,5 @@ contract TestPREngine is Test {
         uint256 collateralDeposited = prEngine.s_collateralDeposited(bob, wethAddress);
 
         assertEq(collateralDeposited, depositAmount);
-
     }
-
-
 }
