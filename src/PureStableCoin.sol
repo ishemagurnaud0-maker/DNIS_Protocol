@@ -22,7 +22,7 @@ contract PureStableCoin is ERC20Burnable, Ownable {
     error PureStableCoin__InsufficientFunds();
     error PureStableCoin__NotZeroAddress();
 
-    constructor() ERC20("PURE", "PR") Ownable(msg.sender) {}
+    constructor() ERC20("PURE", "PRE") Ownable(msg.sender) {}
 
     function burn(uint256 _amount) public override onlyOwner {
         uint256 balance = balanceOf(msg.sender);

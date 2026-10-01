@@ -9,7 +9,7 @@ import {HelperConfig} from "./HelperConfig.s.sol";
 
 contract DeployPureCoin is Script {
 
-    function run() external returns(PureStableCoin) {
+    function run() external returns(PureStableCoin, PREngine) {
 
         HelperConfig config = new HelperConfig(); 
         (
@@ -37,8 +37,10 @@ contract DeployPureCoin is Script {
         vm.startBroadcast();
         PureStableCoin pureCoin = new PureStableCoin();
         PREngine prEngine = new PREngine(tokenAddresses, priceFeedAddresses, address(pureCoin), LT_THRESHOLD);
+
+        pureCoin.transferOwnership(address(prEngine));
         vm.stopBroadcast();
 
-        return pureCoin;
+        return (pureCoin, prEngine);
     }
 }
