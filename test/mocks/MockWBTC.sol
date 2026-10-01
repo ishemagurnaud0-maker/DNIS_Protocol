@@ -13,7 +13,7 @@ contract MockWBTC is ERC20 {
     * @notice The normal decimals function for ERC20s returns 18 but for standard Wrapped BTC it must return only 8 for precision
      */    
 
-    function decimals() public view virtual override returns(uint256) {
+    function decimals() public view virtual override returns(uint8) {
         return 8;
     }
 

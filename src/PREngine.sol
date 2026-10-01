@@ -190,5 +190,17 @@ contract PREngine is ReentrancyGuard {
         return (uint256(price) * ADDITIONAL_PRECISION * amount) / PRECISION;
     }
 
+    //test helper functions
 
+    function getWBTCAddress() external view returns(address) {
+        return s_collateralTokens[1];
+    }
+
+    function getWETHAddress() external view returns(address) {
+        return s_collateralTokens[0];
+    }
+
+    function getCollateralDeposited(address user, address tokenAddress) external view returns(uint256) {
+        return s_collateralDeposited[user][tokenAddress];
+    }
 }
