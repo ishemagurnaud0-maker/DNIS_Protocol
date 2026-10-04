@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-import { Test, console } from "forge-std/Test.sol";
+import { Test, console } from "../../lib/forge-std/src/Test.sol";
 import { DeployPureCoin } from "../../script/DeployPRC.s.sol";
 import { PREngine } from "../../src/PREngine.sol";
 import { PureStableCoin } from "../../src/PureStableCoin.sol";
