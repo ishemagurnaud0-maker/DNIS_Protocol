@@ -17,9 +17,40 @@ contract TestPREngine is Test {
         (pureCoin, prEngine) = deployer.run();
     }
 
-    function testEngineDeployment() public {
+    function testEngineDeployment() public view {
         assert(address(prEngine) != address(0));
     }
+
+
+    function testMintPRCoinFromThePREngine() public {
+        address bob = makeAddr("bob");
+        address wethAddress = prEngine.getWETHAddress(); //ERC20Mock WETH token address
+        uint256 allowance = 200 ether;
+        uint256 amountToMint = 10 ether;
+        uint256 wethToMint = 50 ether;
+
+        vm.deal(bob, allowance);
+
+        //mint WETH tokens
+        vm.startPrank(bob);
+        ERC20Mock(wethAddress).mint(bob, amountToMint);
+        ERC20Mock(wethAddress).approve(address(prEngine), wethToMint);
+    
+        //deposit collateral
+
+        prEngine.depositCollateral(wethAddress, amountToMint);
+        
+
+        //mint PRCoin
+        
+        prEngine.mintPRCoin(amountToMint);
+        vm.stopPrank();
+
+        assert();
+
+    }
+
+
 
     function testDepositCollateral() public {
       address wethAddress = prEngine.getWETHAddress(); //ERC20Mock WETH token address
