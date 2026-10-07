@@ -26,28 +26,29 @@ contract TestPREngine is Test {
         address bob = makeAddr("bob");
         address wethAddress = prEngine.getWETHAddress(); //ERC20Mock WETH token address
         uint256 allowance = 200 ether;
-        uint256 amountToMint = 10 ether;
+        uint256 PRCoinToMint = 10 ether;
         uint256 wethToMint = 50 ether;
+        uint256 wethDeposited = 50 ether;
 
         vm.deal(bob, allowance);
 
         //mint WETH tokens
         vm.startPrank(bob);
-        ERC20Mock(wethAddress).mint(bob, amountToMint);
+        ERC20Mock(wethAddress).mint(bob, wethToMint);
         ERC20Mock(wethAddress).approve(address(prEngine), wethToMint);
     
         //deposit collateral
 
-        prEngine.depositCollateral(wethAddress, amountToMint);
+        prEngine.depositCollateral(wethAddress, wethDeposited);
         
 
         //mint PRCoin
         
-        prEngine.mintPRCoin(amountToMint);
+        prEngine.mintPRCoin(PRCoinToMint);
         vm.stopPrank();
 
-        assert(amountToMint == prEngine.getPRCoinMinted());
-        assert(amountToMint == pureCoin.balanceOf(bob));
+        assert(PRCoinToMint == prEngine.getPRCoinMinted());
+        assert(PRCoinToMint == pureCoin.balanceOf(bob));
 
     }
 

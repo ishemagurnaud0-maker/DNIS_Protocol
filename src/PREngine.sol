@@ -133,8 +133,8 @@ contract PREngine is ReentrancyGuard {
      */
 
     function mintPRCoin(uint256 amountToMint) external NotZero(amountToMint) nonReentrant {
-        _revertIfHealthFactorIsBroken(msg.sender);
         s_PRCoinMinted[msg.sender] += amountToMint;
+        _revertIfHealthFactorIsBroken(msg.sender);
         bool minted = i_PRCoin.mint(msg.sender, amountToMint);
         if (minted) {
             emit PUREStableCoinMinted(msg.sender, amountToMint);
@@ -154,8 +154,7 @@ contract PREngine is ReentrancyGuard {
 
     function _healthFactor(address user) internal view returns (uint256) {
         (uint256 totalPRcoinMinted, uint256 totalCollateralDepositedInUSD) = _getAccountInfo(user);
-        uint256 collateralAdjustedForThresHold =
-            (totalCollateralDepositedInUSD * i_LiquidationThreshold) / LIQUIDATION_PRECISION;
+        uint256 collateralAdjustedForThresHold = (totalCollateralDepositedInUSD * i_LiquidationThreshold) / LIQUIDATION_PRECISION;
 
         return (collateralAdjustedForThresHold * PRECISION) / totalPRcoinMinted;
     }
