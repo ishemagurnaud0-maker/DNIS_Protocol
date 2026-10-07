@@ -47,7 +47,7 @@ contract TestPREngine is Test {
         prEngine.mintPRCoin(PRCoinToMint);
         vm.stopPrank();
 
-        assert(PRCoinToMint == prEngine.getPRCoinMinted());
+        assert(PRCoinToMint == prEngine.getPRCoinMinted(bob));
         assert(PRCoinToMint == pureCoin.balanceOf(bob));
 
     }

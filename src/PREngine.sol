@@ -210,7 +210,7 @@ contract PREngine is ReentrancyGuard {
         return s_collateralDeposited[user][tokenAddress];
     }
 
-    function getPRCoinMinted() external view returns(uint256) {
-        return s_PRCoinMinted[msg.sender];
+    function getPRCoinMinted(address user) external view returns(uint256) {
+        return s_PRCoinMinted[user];
     }
 }
