@@ -166,12 +166,12 @@ contract PREngine is ReentrancyGuard {
         returns (uint256 totalPRcoinMinted, uint256 totalCollateralDepositedInUSD)
     {
         totalPRcoinMinted = s_PRCoinMinted[user];
-        totalCollateralDepositedInUSD = _getAccountCollateralValue(user);
+        totalCollateralDepositedInUSD = _getAccountCollateralValueInUSD(user);
 
         return (totalPRcoinMinted, totalCollateralDepositedInUSD);
     }
 
-    function _getAccountCollateralValue(address user) public view returns (uint256 totalValue) {
+    function _getAccountCollateralValueInUSD(address user) public view returns (uint256 totalValue) {
         for (uint256 i = 0; i < s_collateralTokens.length; i++) {
             address token = s_collateralTokens[i];
             uint256 amount = s_collateralDeposited[user][token];
