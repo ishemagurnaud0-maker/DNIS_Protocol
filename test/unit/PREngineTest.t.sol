@@ -66,9 +66,8 @@ contract TestPREngine is Test {
         vm.startPrank(bob);
         ERC20Mock(wethAddress).mint(bob, amount);
         ERC20Mock(wethAddress).approve(address(prEngine), allowance);
-        vm.stopPrank();
-
-        vm.startPrank(bob);
+        
+        // deposit collateral
         prEngine.depositCollateral(wethAddress, amount);
         vm.stopPrank();
 
