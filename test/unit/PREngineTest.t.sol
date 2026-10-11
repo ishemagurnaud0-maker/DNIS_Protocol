@@ -75,4 +75,17 @@ contract TestPREngine is Test {
     }
 
 
+    function testGetUSDValue() public view {
+        address wethAddress = prEngine.getWETHAddress(); //ERC20Mock WETH token address
+        uint256 amount = 10 ether; // 10e18
+
+      // 1 ether = 2000 USD, so 10 ether = 10e18 * 2000 = 20000e18
+        uint256 expectedUSDValue = 20000 ether; // 20000e18 
+
+        uint256 usdValue = prEngine.getUSDValue(wethAddress, amount);
+
+        assert(usdValue == expectedUSDValue);
+    }
+
+
 }
