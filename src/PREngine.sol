@@ -86,17 +86,23 @@ contract PREngine is ReentrancyGuard {
     }
 
     
+    
 
-    function depositCollateralAndMintPRCoin() external {}
+    function depositCollateralAndMintPRCoin(address tokenCollateralAddress, uint256 amountCollateral, uint256 amountToMint) external {
+        depositCollateral(tokenCollateralAddress, amountCollateral);
+        mintPRCoin(amountToMint);
+    }
 
     /*
     * @param tokenCollateralAddress The address of the token to deposit as collateral
     * @param amountCollateral The amount of collateral that you are to put up in order to borrow the PURE stablecoin
-
+    * @param amountToMint The amount of PURE stablecoin you want to mint
+    * @dev This function allows users to deposit collateral and mint PURE stablecoin in a single transaction.
+    * @notice This function follows the Checks-Effects-Interactions pattern
     */
 
     function depositCollateral(address tokenCollateralAddress, uint256 amountCollateral)
-        external
+        public
         NotZero(amountCollateral)
         isTokenAllowed(tokenCollateralAddress)
         nonReentrant
@@ -132,7 +138,7 @@ contract PREngine is ReentrancyGuard {
     * @notice They must have more collateral value than the minimum threshold
      */
 
-    function mintPRCoin(uint256 amountToMint) external NotZero(amountToMint) nonReentrant {
+    function mintPRCoin(uint256 amountToMint) public NotZero(amountToMint) nonReentrant {
         s_PRCoinMinted[msg.sender] += amountToMint;
         _revertIfHealthFactorIsBroken(msg.sender);
         bool minted = i_PRCoin.mint(msg.sender, amountToMint);
