@@ -36,6 +36,7 @@ contract PREngine is ReentrancyGuard {
 
     event CollateralDeposited(address indexed owner, address indexed tokenAddress, uint256 amount);
     event PUREStableCoinMinted(address indexed account, uint256 indexed amount);
+    event CollateralHasBeenRedeemed(address indexed account, address indexed tokenAddress, uint256 amount);
 
     mapping(address account => mapping(address token => uint256 amount)) public s_collateralDeposited;
     mapping(address token => address priceFeed) private s_tokenToPriceFeed;
@@ -119,7 +120,20 @@ contract PREngine is ReentrancyGuard {
 
     function redeemCollateralForPRCoin() external {}
 
-    function redeemCollateral() external {}
+
+
+    function redeemCollateral(address tokenAddress, uint256 amount) external NotZero(amount) nonReentrant isTokenAllowed(tokenAddress) {
+       s_collateralDeposited[msg.sender][tokenAddress] -= amount;
+       emit CollateralHasBeenRedeemed(msg.sender, tokenAddress, amount);
+       bool success = IERC20(tokenAddress).transfer(msg.sender, amount);
+
+       if (!success) {
+           revert PREngine__TransferFailed();
+       }
+
+       _revertIfHealthFactorIsBroken(msg.sender);
+
+    }
 
     function liquidate() external {}
 
