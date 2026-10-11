@@ -83,6 +83,8 @@ contract TestPREngine is Test {
         uint256 expectedUSDValue = 20000 ether; // 20000e18 
 
         uint256 usdValue = prEngine.getUSDValue(wethAddress, amount);
+        console.log("USD Value: ", usdValue);
+
 
         assert(usdValue == expectedUSDValue);
     }

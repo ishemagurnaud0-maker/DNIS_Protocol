@@ -43,7 +43,7 @@ contract PREngine is ReentrancyGuard {
 
     uint256 private constant MIN_HEALTH_FACTOR = 1;
     uint256 private constant PRECISION = 1e18;
-    uint256 private constant ADDITIONAL_PRECISION = 1e18;
+    uint256 private constant ADDITIONAL_PRECISION = 1e10;
     uint256 private constant LIQUIDATION_PRECISION = 100;
 
     PureStableCoin private immutable i_PRCoin;
