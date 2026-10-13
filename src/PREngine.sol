@@ -4,7 +4,7 @@ pragma solidity ^0.8.30;
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {PureStableCoin} from "./PureStableCoin.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/Aggr0egatorV3Interface.sol";
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
 /*
 * @title PUREStableCoin Engine
@@ -152,7 +152,7 @@ contract PREngine is ReentrancyGuard {
      * @param amount The amount of token to redeem
      */
 
-    function redeemCollateral(address tokenAddress, address from, uint256 amount)
+    function redeemCollateral(address tokenAddress, uint256 amount)
         public
         NotZero(amount)
         nonReentrant
@@ -250,7 +250,7 @@ contract PREngine is ReentrancyGuard {
         internal
     {
         s_PRCoinMinted[_from] -= amountToRedeem;
-        CollateralRedeemed(_from, _to, tokenCollateralAddress, amountToRedeem);
+       emit CollateralRedeemed(_from, _to, tokenCollateralAddress, amountToRedeem);
 
         bool success = IERC20(tokenCollateralAddress).transfer(_to, amountToRedeem);
         if (!success) {
