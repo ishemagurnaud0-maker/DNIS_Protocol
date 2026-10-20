@@ -11,15 +11,36 @@ contract TestPREngine is Test {
     PREngine public prEngine;
     PureStableCoin public pureCoin;
     DeployPureCoin public deployer;
+    address weth;
+    address wethUsdPriceFeedAddress;
+    address wbtcUsdPriceFeedAddress;
 
     function setUp() public {
         deployer = new DeployPureCoin();
-        (pureCoin, prEngine) = deployer.run();
+        (pureCoin, prEngine, weth, wethUsdPriceFeedAddress, wbtcUsdPriceFeedAddress) = deployer.run();
+    }
+
+    address[] private tokenAddresses;
+    address[] private priceFeedAddresses;
+
+    //// /////////// //////// ////
+    //// Constructor tests /////
+
+    function testRevertIfTokenAddressesExceedsPriceFeeds() public {
+        tokenAddresses.push(weth);
+        priceFeedAddresses.push(wbtcUsdPriceFeedAddress);
+        priceFeedAddresses.push(wethUsdPriceFeedAddress);
+
+        vm.expectRevert(PREngine.PREngine__TokenAddressesExceedPriceFeeds.selector);
+        new PREngine(tokenAddresses, priceFeedAddresses, address(pureCoin), 50);
     }
 
     function testEngineDeployment() public view {
         assert(address(prEngine) != address(0));
     }
+
+    //// /////////// //////// ////
+    //// Unit function tests /////
 
     function testMintPRCoinFromThePREngine() public {
         address bob = makeAddr("bob");
@@ -69,6 +90,9 @@ contract TestPREngine is Test {
         assert(amount == prEngine.getCollateralDeposited(bob, wethAddress));
     }
 
+    //// /////////// //////// ////
+    //// PriceFeed tests /////
+
     function testGetUSDValue() public view {
         address wethAddress = prEngine.getWETHAddress(); //ERC20Mock WETH token address
         uint256 amount = 10 ether; // 10e18
@@ -82,3 +106,4 @@ contract TestPREngine is Test {
         assert(usdValue == expectedUSDValue);
     }
 }
+

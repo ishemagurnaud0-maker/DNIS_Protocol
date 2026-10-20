@@ -227,7 +227,6 @@ contract PREngine is ReentrancyGuard {
 
         // casting to 'uint80' is safe because of previous checks
         // forge-lint: disable-next-line(unsafe-typecast)
-
         if (price <= 0 || uint256(price) > type(uint256).max) {
             revert PREngine__InvalidPriceFeedAnswer();
         }
@@ -250,7 +249,7 @@ contract PREngine is ReentrancyGuard {
         internal
     {
         s_PRCoinMinted[_from] -= amountToRedeem;
-       emit CollateralRedeemed(_from, _to, tokenCollateralAddress, amountToRedeem);
+        emit CollateralRedeemed(_from, _to, tokenCollateralAddress, amountToRedeem);
 
         bool success = IERC20(tokenCollateralAddress).transfer(_to, amountToRedeem);
         if (!success) {
