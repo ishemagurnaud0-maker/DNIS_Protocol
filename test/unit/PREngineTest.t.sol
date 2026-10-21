@@ -11,14 +11,12 @@ contract TestPREngine is Test {
     PREngine public prEngine;
     PureStableCoin public pureCoin;
     DeployPureCoin public deployer;
-    address wethUsdPriceFeedAddress;
-    address wbtcUsdPriceFeedAddress;
     address bob = makeAddr("bob");
     uint256 private constant AMOUNT = 10 ether;
 
     function setUp() public {
         deployer = new DeployPureCoin();
-        (pureCoin, prEngine, wethUsdPriceFeedAddress, wbtcUsdPriceFeedAddress) = deployer.run();
+        (pureCoin, prEngine) = deployer.run();
     }
 
     address[] private tokenAddresses;
@@ -47,7 +45,9 @@ contract TestPREngine is Test {
 
     function testRevertIfTokenAddressesExceedsPriceFeeds() public {
         address weth = prEngine.getWETHAddress();
+        address wbtc = prEngine.getWBTCAddress();
         address wethUsdPriceFeedAddress = prEngine.getPriceFeedAddress(weth);
+        address wbtcUsdPriceFeedAddress = prEngine.getPriceFeedAddress(wbtc);
 
         tokenAddresses.push(weth);
         priceFeedAddresses.push(wbtcUsdPriceFeedAddress);
@@ -165,6 +165,21 @@ contract TestPREngine is Test {
 
         assert(totalPRcoinMinted == amountToMint);
         assert(totalCollateralDepositedInUSD == prEngine.getUSDValue(weth, AMOUNT));
+    }
+
+    function testBurnPRCoin() public depositCollateral {
+        uint256 prCoinToMint = 10 ether;
+        uint256 prCoinToBurn = 10 ether;
+
+        vm.startPrank(bob);
+        // mint PRCoin
+        prEngine.mintPRCoin(prCoinToMint);
+
+        //Burn PRCoin
+        prEngine.burnPRCoin(prCoinToBurn);
+        vm.stopPrank();
+
+        assert(prEngine.getPRCoinMinted(bob) == 0);
     }
 
     //// /////////// //////// ////
