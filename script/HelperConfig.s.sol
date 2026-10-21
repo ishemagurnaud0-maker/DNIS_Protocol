@@ -61,7 +61,7 @@ contract HelperConfig is Script {
         //WBTC stablecoin mock
 
         MockV3Aggregator btcUsdPriceFeed = new MockV3Aggregator(DECIMALS, BTC_USD_PRICE);
-        ERC20Mock wbtcERC20Mock = new ERC20Mock("WBTC", "WETH", msg.sender, 1000e8);
+        ERC20Mock wbtcERC20Mock = new ERC20Mock("WBTC", "WBTC", msg.sender, 1000e8);
 
         vm.stopBroadcast();
 
