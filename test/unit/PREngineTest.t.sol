@@ -11,43 +11,43 @@ contract TestPREngine is Test {
     PREngine public prEngine;
     PureStableCoin public pureCoin;
     DeployPureCoin public deployer;
-    address weth;
     address wethUsdPriceFeedAddress;
     address wbtcUsdPriceFeedAddress;
     address bob = makeAddr("bob");
+    uint256 private constant AMOUNT = 10 ether;
 
     function setUp() public {
         deployer = new DeployPureCoin();
-        (pureCoin, prEngine, weth, wethUsdPriceFeedAddress, wbtcUsdPriceFeedAddress) = deployer.run();
+        (pureCoin, prEngine, wethUsdPriceFeedAddress, wbtcUsdPriceFeedAddress) = deployer.run();
     }
 
     address[] private tokenAddresses;
     address[] private priceFeedAddresses;
 
-
     modifier depositCollateral() {
         address wethAddress = prEngine.getWETHAddress(); //ERC20Mock WETH token address
         uint256 allowance = 100 ether;
-        uint256 amount = 10 ether; // 10e18
 
         vm.deal(bob, allowance);
 
         //mint WETH tokens
         vm.startPrank(bob);
-        ERC20Mock(wethAddress).mint(bob, amount);
+        ERC20Mock(wethAddress).mint(bob, AMOUNT);
         ERC20Mock(wethAddress).approve(address(prEngine), allowance);
 
         // deposit collateral
-        prEngine.depositCollateral(wethAddress, amount);
+        prEngine.depositCollateral(wethAddress, AMOUNT);
         vm.stopPrank();
 
-        _; 
+        _;
     }
 
     //// /////////// //////// ////
     //// Constructor tests /////
 
     function testRevertIfTokenAddressesExceedsPriceFeeds() public {
+        address weth = prEngine.getWETHAddress();
+
         tokenAddresses.push(weth);
         priceFeedAddresses.push(wbtcUsdPriceFeedAddress);
         priceFeedAddresses.push(wethUsdPriceFeedAddress);
@@ -63,7 +63,7 @@ contract TestPREngine is Test {
     //// /////////// //////// ////
     //// Unit function tests /////
 
-    function testMintPRCoinFromThePREngine() public {
+    function testMintPRCoin() public {
         address wethAddress = prEngine.getWETHAddress(); //ERC20Mock WETH token address
         uint256 allowance = 200 ether;
         uint256 PRCoinToMint = 10 ether;
@@ -109,27 +109,61 @@ contract TestPREngine is Test {
         assert(amount == prEngine.getCollateralDeposited(bob, wethAddress));
     }
 
-
     function testRevertsWithUnapprovedTokenCollateral() public {
         uint256 amountCollateral = 100 ether;
         uint256 depositFee = 10 ether;
-        ERC20Mock rado = new ERC20Mock("RADO","RADO", bob, amountCollateral);
+        ERC20Mock rado = new ERC20Mock("RADO", "RADO", bob, amountCollateral);
 
         vm.startPrank(bob);
         vm.expectRevert(PREngine.PREngine__InvalidTokenAddress.selector);
-        prEngine.depositCollateral(address(rado),depositFee);
+        prEngine.depositCollateral(address(rado), depositFee);
+        vm.stopPrank();
+    }
+
+    function testRevertsOnNotZeroModifier() public {
+        address wethAddress = prEngine.getWETHAddress(); //ERC20Mock WETH token address
+        uint256 allowance = 100 ether;
+
+        vm.deal(bob, allowance);
+
+        //mint WETH tokens
+        vm.startPrank(bob);
+        ERC20Mock(wethAddress).mint(bob, AMOUNT);
+        ERC20Mock(wethAddress).approve(address(prEngine), allowance);
+
+        // deposit collateral
+        vm.expectRevert(PREngine.PREngine__MustBeGreaterThanZero.selector);
+        prEngine.depositCollateral(wethAddress, 0);
         vm.stopPrank();
     }
 
     function testDepositCollateralAndGetAccountInfo() public depositCollateral {
-         uint256 expectedPRCoinMinted = 0;
-         uint256 expectedCollateralInUsd = 20000e18;
+        uint256 expectedPRCoinMinted = 0;
+        address weth = prEngine.getWETHAddress();
+
+        (uint256 totalPRcoinMinted, uint256 totalCollateralDepositedInUSD) = prEngine.getAccountInformation(bob);
+        uint256 expectedDepositedCollateral = prEngine.getTokenAmountFromUSDValue(weth, totalCollateralDepositedInUSD);
+
+        assertEq(totalPRcoinMinted, expectedPRCoinMinted);
+        assertEq(AMOUNT, expectedDepositedCollateral);
+    }
+
+    function testDepositCollateralAndMintPRCoin() public {
+        uint256 amountToMint = 50 ether;
+        uint256 allowance = 20 ether;
+        address weth = prEngine.getWETHAddress();
+
+        vm.startPrank(bob);
+        ERC20Mock(weth).mint(bob, amountToMint);
+        ERC20Mock(weth).approve(address(prEngine), allowance);
+
+        prEngine.depositCollateralAndMintPRCoin(weth, AMOUNT, amountToMint);
+        vm.stopPrank();
+
         (uint256 totalPRcoinMinted, uint256 totalCollateralDepositedInUSD) = prEngine.getAccountInformation(bob);
 
-        assertEq(totalPRcoinMinted,expectedPRCoinMinted);
-        assertEq(totalCollateralDepositedInUSD, expectedCollateralInUsd);
-
-        
+        assert(totalPRcoinMinted == amountToMint);
+        assert(totalCollateralDepositedInUSD == prEngine.getUSDValue(weth, AMOUNT));
     }
 
     //// /////////// //////// ////
@@ -151,13 +185,12 @@ contract TestPREngine is Test {
     function testGetTokenAmountFromUSDValue() public view {
         uint256 debtToCoverInUsd = 1000 ether;
         uint256 expectedTokenAmount = 0.5 ether;
+        address weth = prEngine.getWETHAddress();
 
         uint256 obtainedTokenAmount = prEngine.getTokenAmountFromUSDValue(weth, debtToCoverInUsd);
         console.log(obtainedTokenAmount);
 
         assert(expectedTokenAmount == obtainedTokenAmount);
     }
-
-
 }
 

@@ -9,7 +9,7 @@ import {HelperConfig} from "./HelperConfig.s.sol";
 contract DeployPureCoin is Script {
     uint256 private constant LT_THRESHOLD = 50;
 
-    function run() external returns (PureStableCoin, PREngine, address, address, address) {
+    function run() external returns (PureStableCoin, PREngine, address, address) {
         HelperConfig config = new HelperConfig();
 
         (address wethUsdPriceFeedAddress, address wbtcUsdPriceFeedAddress, address weth, address wbtc) =
@@ -30,6 +30,6 @@ contract DeployPureCoin is Script {
         pureCoin.transferOwnership(address(prEngine));
         vm.stopBroadcast();
 
-        return (pureCoin, prEngine, weth, wethUsdPriceFeedAddress, wbtcUsdPriceFeedAddress);
+        return (pureCoin, prEngine, wethUsdPriceFeedAddress, wbtcUsdPriceFeedAddress);
     }
 }

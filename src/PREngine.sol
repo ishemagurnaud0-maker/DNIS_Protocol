@@ -221,10 +221,13 @@ contract PREngine is ReentrancyGuard {
         return _healthFactor(user);
     }
 
-    function getAccountInformation(address account) external view returns(uint256 totalPRcoinMinted, uint256 totalCollateralDepositedInUSD) {
+    function getAccountInformation(address account)
+        external
+        view
+        returns (uint256 totalPRcoinMinted, uint256 totalCollateralDepositedInUSD)
+    {
         (totalPRcoinMinted, totalCollateralDepositedInUSD) = _getAccountInfo(account);
     }
-    
 
     function getTokenAmountFromUSDValue(address token, uint256 usdAmountOfDebt) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_tokenToPriceFeed[token]);
