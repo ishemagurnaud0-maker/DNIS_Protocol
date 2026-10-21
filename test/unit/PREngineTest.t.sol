@@ -105,5 +105,15 @@ contract TestPREngine is Test {
 
         assert(usdValue == expectedUSDValue);
     }
+
+    function testGetTokenAmountFromUSDValue() public view {
+        uint256 debtToCoverInUsd = 1000 ether
+        uint256 expectedTokenAmount = 0.5 ether;
+
+        uint256 obtainedTokenAmount = prEngine.getTokenAmountFromUSDValue(weth, debtToCoverInUsd);
+        console.log(obtainedTokenAmount);
+
+        assert(expectedTokenAmount == obtainedTokenAmount);
+    }
 }
 

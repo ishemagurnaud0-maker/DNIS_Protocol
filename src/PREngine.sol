@@ -173,7 +173,7 @@ contract PREngine is ReentrancyGuard {
             revert PREngine__HealthFactorIsHealthy(getHealthFactor(user));
         }
 
-        uint256 tokenAmountFromDebt = _getTokenAmountFromUSDValue(collateral, debtToCover);
+        uint256 tokenAmountFromDebt = getTokenAmountFromUSDValue(collateral, debtToCover);
         uint256 bonusCollateral = (tokenAmountFromDebt * LIQUIDATION_BONUS) / LIQUIDATION_PRECISION;
         uint256 totalCollateralToRedeem = tokenAmountFromDebt + bonusCollateral;
 
@@ -221,7 +221,7 @@ contract PREngine is ReentrancyGuard {
         return _healthFactor(user);
     }
 
-    function _getTokenAmountFromUSDValue(address token, uint256 usdAmountOfDebt) internal view returns (uint256) {
+    function getTokenAmountFromUSDValue(address token, uint256 usdAmountOfDebt) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_tokenToPriceFeed[token]);
         (, int256 price,,,) = priceFeed.latestRoundData();
 
