@@ -47,6 +47,7 @@ contract TestPREngine is Test {
 
     function testRevertIfTokenAddressesExceedsPriceFeeds() public {
         address weth = prEngine.getWETHAddress();
+        address wethUsdPriceFeedAddress = prEngine.getPriceFeedAddress(weth);
 
         tokenAddresses.push(weth);
         priceFeedAddresses.push(wbtcUsdPriceFeedAddress);

@@ -334,4 +334,8 @@ contract PREngine is ReentrancyGuard {
     function getPRCoinMinted(address user) external view returns (uint256) {
         return s_PRCoinMinted[user];
     }
+
+    function getPriceFeedAddress(address token) external view returns (address) {
+        return s_tokenToPriceFeed[token];
+    }
 }
