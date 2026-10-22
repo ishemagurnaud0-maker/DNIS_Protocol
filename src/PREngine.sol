@@ -274,6 +274,9 @@ contract PREngine is ReentrancyGuard {
 
     function _healthFactor(address user) internal view returns (uint256) {
         (uint256 totalPRcoinMinted, uint256 totalCollateralDepositedInUSD) = _getAccountInfo(user);
+
+        if (totalPRcoinMinted == 0) return type(uint256).max;
+
         uint256 collateralAdjustedForThresHold =
             (totalCollateralDepositedInUSD * i_LiquidationThreshold) / LIQUIDATION_PRECISION;
 

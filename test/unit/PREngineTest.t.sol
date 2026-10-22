@@ -24,9 +24,10 @@ contract TestPREngine is Test {
 
     modifier depositCollateral() {
         address wethAddress = prEngine.getWETHAddress(); //ERC20Mock WETH token address
-        uint256 allowance = 100 ether;
+        uint256 funds = 100 ether;
+        uint256 allowance = 20 ether;
 
-        vm.deal(bob, allowance);
+        vm.deal(bob, funds);
 
         //mint WETH tokens
         vm.startPrank(bob);
@@ -169,17 +170,46 @@ contract TestPREngine is Test {
 
     function testBurnPRCoin() public depositCollateral {
         uint256 prCoinToMint = 10 ether;
-        uint256 prCoinToBurn = 10 ether;
+        uint256 prCoinToBurn = 5 ether;
+        uint256 amountToApprove = 20 ether;
 
         vm.startPrank(bob);
         // mint PRCoin
         prEngine.mintPRCoin(prCoinToMint);
+        //approving the prEngine in order to transfer the PRCoin on my behalf
+        pureCoin.approve(address(prEngine), amountToApprove);
 
         //Burn PRCoin
         prEngine.burnPRCoin(prCoinToBurn);
         vm.stopPrank();
 
-        assert(prEngine.getPRCoinMinted(bob) == 0);
+        uint256 expectedBalance = 5 ether;
+
+        assert(prEngine.getPRCoinMinted(bob) == expectedBalance);
+    }
+
+    function testRedeemCollateral() public depositCollateral {
+        uint256 prCoinToMint = 15 ether;
+        uint256 amountToRedeem = 5 ether;
+        uint256 amountToBurn = 5 ether;
+        address wethAddress = prEngine.getWETHAddress();
+        uint256 startingBalance = ERC20Mock(wethAddress).balanceOf(bob);
+
+        vm.startPrank(bob);
+        prEngine.mintPRCoin(prCoinToMint);
+
+        //burning the PRCoin in order to redeem collateral
+        pureCoin.approve(address(prEngine), amountToBurn);
+        prEngine.burnPRCoin(amountToBurn);
+
+        prEngine.redeemCollateral(wethAddress, amountToRedeem);
+        vm.stopPrank();
+
+        uint256 newWethBalance = amountToRedeem + startingBalance;
+        uint256 remainingPRCoin = 10 ether;
+
+        assertEq(pureCoin.balanceOf(bob), remainingPRCoin);
+        assert(ERC20Mock(wethAddress).balanceOf(bob) == newWethBalance);
     }
 
     //// /////////// //////// ////
