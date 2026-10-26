@@ -13,10 +13,14 @@ contract TestPREngine is Test {
     DeployPureCoin public deployer;
     address bob = makeAddr("bob");
     uint256 private constant AMOUNT = 10 ether;
+    uint256 private constant FUNDS = 100 ether;
 
     function setUp() public {
         deployer = new DeployPureCoin();
         (pureCoin, prEngine) = deployer.run();
+
+        
+         vm.deal(bob, FUNDS);
     }
 
     address[] private tokenAddresses;
@@ -24,10 +28,10 @@ contract TestPREngine is Test {
 
     modifier depositCollateral() {
         address wethAddress = prEngine.getWETHAddress(); //ERC20Mock WETH token address
-        uint256 funds = 100 ether;
+        
         uint256 allowance = 20 ether;
 
-        vm.deal(bob, funds);
+       
 
         //mint WETH tokens
         vm.startPrank(bob);
@@ -210,6 +214,22 @@ contract TestPREngine is Test {
 
         assertEq(pureCoin.balanceOf(bob), remainingPRCoin);
         assert(ERC20Mock(wethAddress).balanceOf(bob) == newWethBalance);
+    }
+
+    function testGetHealthFactor() public depositCollateral {
+        uint256 amountToMint = 10 ether;
+        
+         
+         vm.startPrank(bob);
+         prEngine.mintPRCoin(amountToMint);
+         vm.stopPrank();
+
+         uint256 healthFactor = prEngine.getHealthFactor(bob);
+         console.log(healthFactor);
+
+        uint256 MIN_HEALTH_FACTOR = 1;
+         
+         assert(healthFactor > MIN_HEALTH_FACTOR);
     }
 
     //// /////////// //////// ////
