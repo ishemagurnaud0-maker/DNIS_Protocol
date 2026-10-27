@@ -306,7 +306,11 @@ contract PREngine is ReentrancyGuard {
         for (uint256 i = 0; i < s_collateralTokens.length; i++) {
             address token = s_collateralTokens[i];
             uint256 amount = s_collateralDeposited[user][token];
-            totalValue += getUSDValue(token, amount);
+
+            if(amount > 0) {
+                totalValue += getUSDValue(token, amount);
+            }
+            
         }
 
         return totalValue;
