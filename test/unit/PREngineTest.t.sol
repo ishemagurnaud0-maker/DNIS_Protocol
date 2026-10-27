@@ -232,6 +232,34 @@ contract TestPREngine is Test {
          assert(healthFactor > MIN_HEALTH_FACTOR);
     }
 
+
+    function testLiquidationCanNotHappenWhenThereIsAHealthyFactor() public depositCollateral {
+        uint256 amountToMint = 1000 ether;
+        address Jack = makeAddr("Jack");
+        address weth = prEngine.getWETHAddress();
+        uint256 MIN_HEALTH_FACTOR = 1;
+
+
+        vm.startBroadcast(bob);
+        prEngine.mintPRCoin(amountToMint);
+        vm.stopBroadcast();
+
+        uint256 startingHealthFactor = prEngine.getHealthFactor(bob);
+
+        if(startingHealthFactor < MIN_HEALTH_FACTOR) {
+            vm.startBroadcast(Jack);
+            prEngine.liquidate(weth, bob, amountToMint);
+            vm.stopBroadcast();
+
+            uint256 finalHealthFactor = prEngine.getHealthFactor(bob);
+
+            assert(finalHealthFactor >= MIN_HEALTH_FACTOR);
+
+        }else {
+            console.log("Bob has a perfect health Factor so their account can not be liquidated.");
+        }
+    }
+
     //// /////////// //////// ////
     //// PriceFeed tests /////
 
