@@ -162,6 +162,14 @@ contract PREngine is ReentrancyGuard {
         _revertIfHealthFactorIsBroken(msg.sender);
     }
 
+  /*
+   * @param collateral is the address of the collateral token the liquidator is going to pay off
+   * @param user is the account going to be liquidated
+   * @param debtToCover is the amount of PRCoin that the @param user has minted
+   */
+
+
+
     function liquidate(address collateral, address user, uint256 debtToCover)
         external
         NotZero(debtToCover)
