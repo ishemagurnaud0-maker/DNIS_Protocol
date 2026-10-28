@@ -13,3 +13,7 @@ We will use the algorithmic stability method for burning and minting the coin in
 The coin will use exogenous collateral by where people will put up either wETH or wBTC as collateral in order to borrow the stablecoin.
 
 
+
+
+What are invariants in order to create some stateful fuzz stating?
+ > 
