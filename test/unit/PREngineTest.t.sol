@@ -17,7 +17,7 @@ contract TestPREngine is Test {
 
     function setUp() public {
         deployer = new DeployPureCoin();
-        (pureCoin, prEngine) = deployer.run();
+        (pureCoin, prEngine, ) = deployer.run();
 
         vm.deal(bob, FUNDS);
     }

@@ -22,9 +22,9 @@ contract InvariantPRCoinTest is StdInvariant, Test {
 
     function setUp() public {
         DeployPureCoin deployer = new DeployPureCoin();
-        (prCoin, prEngine) = deployer.run();
+        (prCoin, prEngine, config) = deployer.run();
 
-        vm.deal(bob, FUNDS);
+        targetContract(address(prEngine));
     }
 }
 
