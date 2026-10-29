@@ -11,10 +11,12 @@ import {PREngine} from "./../../src/PREngine.sol";
 import {PureStableCoin} from "./../../src/PureStableCoin.sol";
 import {Test, console} from "forge-std/Test.sol";
 import {StdInvariant} from "forge-std/StdInvariant.sol";
+import {HelperConfig} from "./../../script/HelperConfig.s.sol";
 
 contract InvariantPRCoinTest is StdInvariant, Test {
-    PREngine public prEngine;
-    PureStableCoin public prCoin;
+    PREngine prEngine;
+    PureStableCoin prCoin;
+    HelperConfig config;
     address bob = makeAddr("bob");
     uint256 public constant FUNDS = 100 ether;
 
