@@ -19,8 +19,7 @@ contract TestPREngine is Test {
         deployer = new DeployPureCoin();
         (pureCoin, prEngine) = deployer.run();
 
-        
-         vm.deal(bob, FUNDS);
+        vm.deal(bob, FUNDS);
     }
 
     address[] private tokenAddresses;
@@ -28,10 +27,8 @@ contract TestPREngine is Test {
 
     modifier depositCollateral() {
         address wethAddress = prEngine.getWETHAddress(); //ERC20Mock WETH token address
-        
-        uint256 allowance = 20 ether;
 
-       
+        uint256 allowance = 20 ether;
 
         //mint WETH tokens
         vm.startPrank(bob);
@@ -218,20 +215,18 @@ contract TestPREngine is Test {
 
     function testGetHealthFactor() public depositCollateral {
         uint256 amountToMint = 10 ether;
-        
-         
-         vm.startPrank(bob);
-         prEngine.mintPRCoin(amountToMint);
-         vm.stopPrank();
 
-         uint256 healthFactor = prEngine.getHealthFactor(bob);
-         console.log(healthFactor);
+        vm.startPrank(bob);
+        prEngine.mintPRCoin(amountToMint);
+        vm.stopPrank();
+
+        uint256 healthFactor = prEngine.getHealthFactor(bob);
+        console.log(healthFactor);
 
         uint256 MIN_HEALTH_FACTOR = 1;
-         
-         assert(healthFactor > MIN_HEALTH_FACTOR);
-    }
 
+        assert(healthFactor > MIN_HEALTH_FACTOR);
+    }
 
     function testLiquidationCanNotHappenWhenThereIsAHealthyFactor() public depositCollateral {
         uint256 amountToMint = 1000 ether;
@@ -239,14 +234,13 @@ contract TestPREngine is Test {
         address weth = prEngine.getWETHAddress();
         uint256 MIN_HEALTH_FACTOR = 1;
 
-
         vm.startBroadcast(bob);
         prEngine.mintPRCoin(amountToMint);
         vm.stopBroadcast();
 
         uint256 startingHealthFactor = prEngine.getHealthFactor(bob);
 
-        if(startingHealthFactor < MIN_HEALTH_FACTOR) {
+        if (startingHealthFactor < MIN_HEALTH_FACTOR) {
             vm.startBroadcast(Jack);
             prEngine.liquidate(weth, bob, amountToMint);
             vm.stopBroadcast();
@@ -254,8 +248,7 @@ contract TestPREngine is Test {
             uint256 finalHealthFactor = prEngine.getHealthFactor(bob);
 
             assert(finalHealthFactor >= MIN_HEALTH_FACTOR);
-
-        }else {
+        } else {
             console.log("Bob has a perfect health Factor so their account can not be liquidated.");
         }
     }
