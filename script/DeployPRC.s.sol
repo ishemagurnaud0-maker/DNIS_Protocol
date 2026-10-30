@@ -13,7 +13,7 @@ contract DeployPureCoin is Script {
         HelperConfig config = new HelperConfig();
 
         (address wethUsdPriceFeedAddress, address wbtcUsdPriceFeedAddress, address weth, address wbtc) =
-            config.getActiveNetwork();
+            config.activeNetworkConfig();
 
         address[] memory tokenAddresses = new address[](2);
         tokenAddresses[0] = weth;

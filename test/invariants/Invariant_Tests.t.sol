@@ -12,16 +12,19 @@ import {PureStableCoin} from "./../../src/PureStableCoin.sol";
 import {Test, console} from "forge-std/Test.sol";
 import {StdInvariant} from "forge-std/StdInvariant.sol";
 import {HelperConfig} from "./../../script/HelperConfig.s.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract InvariantPRCoinTest is StdInvariant, Test {
     PREngine prEngine;
     PureStableCoin prCoin;
     HelperConfig config;
+    address weth;
+    address wbtc;
 
     function setUp() public {
         DeployPureCoin deployer = new DeployPureCoin();
         (prCoin, prEngine, config) = deployer.run();
-        (,,, weth, wbtc) = config.getActiveNetwork();
+        (,, weth, wbtc) = config.activeNetworkConfig( );
 
         console.log(wbtc);
         console.log(weth);
@@ -29,7 +32,7 @@ contract InvariantPRCoinTest is StdInvariant, Test {
         targetContract(address(prEngine));
     }
 
-    function invariant_verifyThatTheCollateralInTheProtocolIsLessThanTheMintedStableCoin() public view {
+    function invariant_verifyThatTheCollateralInTheProtocolIsGreaterThanTheMintedStableCoin() public view {
        
     }
 }
