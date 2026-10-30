@@ -17,14 +17,20 @@ contract InvariantPRCoinTest is StdInvariant, Test {
     PREngine prEngine;
     PureStableCoin prCoin;
     HelperConfig config;
-    address bob = makeAddr("bob");
-    uint256 public constant FUNDS = 100 ether;
 
     function setUp() public {
         DeployPureCoin deployer = new DeployPureCoin();
         (prCoin, prEngine, config) = deployer.run();
+        (,,, weth, wbtc) = config.getActiveNetwork();
+
+        console.log(wbtc);
+        console.log(weth);
 
         targetContract(address(prEngine));
+    }
+
+    function invariant_verifyThatTheCollateralInTheProtocolIsLessThanTheMintedStableCoin() public view {
+       
     }
 }
 
