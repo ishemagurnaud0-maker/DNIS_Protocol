@@ -26,14 +26,20 @@ contract InvariantPRCoinTest is StdInvariant, Test {
         (prCoin, prEngine, config) = deployer.run();
         (,, weth, wbtc) = config.activeNetworkConfig( );
 
-        console.log(wbtc);
-        console.log(weth);
+       
 
         targetContract(address(prEngine));
     }
 
     function invariant_verifyThatTheCollateralInTheProtocolIsGreaterThanTheMintedStableCoin() public view {
+       uint256 prTotalSupply = prCoin.totalSupply();
+       uint256 totalWethDeposited = IERC20(weth).balanceOf(address(prEngine));
+       uint256 totalWbtcDeposited = IERC20(wbtc).balanceOf(address(prEngine));
        
+       uint256 wethValue = prEngine.getUSDValue(weth, totalWethDeposited);
+       uint256 wbtcValue = prEngine.getUSDValue(wbtc, totalWbtcDeposited);
+
+       assert(wethValue + wbtcValue >= prTotalSupply);
+
     }
 }
-
